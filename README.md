@@ -24,7 +24,7 @@ This repository contains the code and instructions for creating a system to cont
   - `/stopR` - Stop the right motor.
 - You can add more requests by changing adding/removing items from the `commands[]` array
   - each item has 2 items
-  - A string item which will contain the text the `exectuteMotorCommand()` function with search for in the GET request
+  - A string item which will contain the text the `executeMotorCommand()` function with search for in the GET request
   - And a function pointer which will contain just the name of the function you want to execute when it finds the string in the request (eg. `GET /forwardL?speed=255` will execute the `forwardL()` function and pass 255 as the speed variable
   - example: `struct Command { {"newMotorCommand", newMotorFunction}}`
   - You dont have to pass a speed variable when creating a new command however it is defined in the struct that there is one so VSCode with throw a warning at compilation that you can ignore
@@ -39,7 +39,7 @@ This repository contains the code and instructions for creating a system to cont
   - `/stopV` - Stop the motor.
 - You can add more requests by changing adding/removing items from the `commands[]` array
   - each item has 2 items
-  - A string item which will contain the text the `exectuteMotorCommand()` function with search for in the GET request
+  - A string item which will contain the text the `executeMotorCommand()` function with search for in the GET request
   - And a function pointer which will contain just the name of the function you want to execute when it finds the string in the request (eg. `GET /up?speed=255` will execute the `up()` function and pass 255 as the speed variable
   - example: `struct Command { {"newMotorCommand", newMotorFunction}}`
   - You dont have to pass a speed variable when creating a new command however it is defined in the struct that there is one so VSCode with throw a warning at compilation that you can ignore
