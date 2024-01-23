@@ -2,13 +2,13 @@
 #include <SPI.h>
 #include <Ethernet.h>
 
- int motor1pin1 = 2;
- int motor1pin2 = 3;
- int motor1ENA = 9;
+int motor1pin1 = 2;
+int motor1pin2 = 3;
+int motor1ENA = 9;
 
- int motor2pin1 = 4;
-const int motor2pin2 = 5;
-const int motor2ENA = 6;
+int motor2pin1 = 4;
+int motor2pin2 = 5;
+int motor2ENA = 6;
 
 void forwardL(int);
 void backwardL(int);
