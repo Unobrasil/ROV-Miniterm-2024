@@ -1,11 +1,12 @@
 {
 	"folders": [
 		{
-			"name": "SingleMotor_Granular",
+			"path": "W2HTMLControlPanel"
+		},
+		{
 			"path": "SingleMotor_Granular"
 		},
 		{
-			"name": "DualMotor_Granular",
 			"path": "DualMotor_Granular"
 		}
 	],
