@@ -1,0 +1,271 @@
+<!--W2 Master Control Panel V0.16-->
+<!--
+	TO-DO (NOT FINISHED): 
+	- analog speed controls
+	- clean up input reading code
+	
+	CHANGELOG:
+	- Dual motor HTTP for turning and forward/backward complete
+	- finished up/down buttons
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>W2 Master Control Panel</title>
+<style>
+.Classborder {
+    background-color:#a3d5dc;
+    color: black;
+    padding: 10px;
+    margin: 20px;
+    border: 1px solid black;
+}
+
+.Tahomafont {
+    font-family:tahoma;
+}
+
+#container {
+    position:relative;
+    width:640px;
+    height:480px;
+    border:10px #a3d5dc inset;
+    left:600px;
+    top:-500px;
+}
+
+#videoElement {
+    width:640px;
+    height:480px;
+    background-color:#111;
+}
+
+#body {
+    height:1px;
+}
+</style>
+</head>
+<body id="body" style="background-color:#c8e1e4;">
+
+<div class="Tahomafont" style="font-size:200%;background-color:#a3d5dc;width:500px;text-align:center;border:3px inset;">
+<span><b>W2 Master Control Panel</b><br><i style="font-size:30%;">v0.16</i></br><span>
+</div>
+
+<div class="Tahomafont" style="position:relative;top:175px;right:490px;"> <!--do not try to make a class for the styles (it breaks everything)-->
+<!--ForwardVis-->
+<p style="font-size:150%;text-align:center;left:722px;position:relative;background-color:#a3d5dc;width:32.5px;height:32.5px;border-style:outset;" id="inputForward">↑</p>
+<!--BackVis-->
+<p style="font-size:150%;text-align:center;left:722px;top:35px;position:relative;background-color:#a3d5dc;width:32.5px;height:32.5px;border-style:outset;" id="inputBackward">↓</p>
+<!--RightVis-->
+<p style="font-size:150%;position:relative;text-align:center;left:780px;top:-74px;background-color:#a3d5dc;width:32.5px;height:32.5px;border-style:outset;" id="inputRight">→</p>
+<!--LeftVis-->
+<p style="font-size:150%;position:relative;left:664px;text-align:center;top:-135px;background-color:#a3d5dc;width:32.5px;height:32.5px;border-style:outset;"id="inputLeft">←</p>
+<!--Claw Control-->
+<p id="inputClaw" style="background-color:#a3d5dc;text-align:center;width:30px;height:100%px;border-style:outset;position:relative;left:724px;text-align:center;top:-188px;">¤</p>
+<!--UpVis-->
+<p style="font-size:150%;position:relative;left:864px;text-align:center;top:-270px;background-color:#a3d5dc;width:32.5px;height:32.5px;border-style:outset;"id="inputUp">↑</p>
+<!--DownVis-->
+<p style="font-size:150%;position:relative;left:864px;text-align:center;top:-275px;background-color:#a3d5dc;width:32.5px;height:32.5px;border-style:outset;"id="inputDown">↓</p>
+</div>
+
+<!--Display-->
+<div id="container">
+
+<iframe id="videoElement" src="http://192.168.1.125/videostream.cgi?user=admin&pwn=">
+
+</iframe>
+
+</div>
+
+<!--INPUTS-->
+<script type="text/javascript">
+//keyHeld variables
+var forwardKeyHeld = false;
+var backwardKeyHeld = false;
+var leftKeyHeld = false;
+var rightKeyHeld = false;
+var clawKeyHeld = false;
+var upKeyHeld = false;
+var downKeyHeld = false;
+
+
+//FORWARD INPUT
+var inputForward = document.getElementById("inputForward");
+document.body.addEventListener("keydown", function(event) {
+    if (event.key.toLowerCase() == 'w' && forwardKeyHeld == false) {
+        inputForward.style.backgroundColor = "#93c1c7";
+        inputForward.style.border = "inset";
+        httpRequest(theURL, "forwardR?speed=255");
+        httpRequest(theURL, "forwardL?speed=255");
+
+        forwardKeyHeld = true;
+    }
+});
+
+document.body.addEventListener("keyup", function(event) {
+    if (event.key.toLowerCase() == 'w'){
+        inputForward.style.backgroundColor = "#a3d5dc";
+        inputForward.style.border = "outset";
+        httpRequest(theURL, "stopR");
+        httpRequest(theURL, "stopL");
+
+        forwardKeyHeld = false;
+    }
+});
+
+//BACKWARD INPUT
+var inputBackward = document.getElementById("inputBackward");
+document.body.addEventListener("keydown", function(event) {
+
+    if (event.key.toLowerCase() == 's' && backwardKeyHeld == false) {
+        inputBackward.style.backgroundColor = "#93c1c7";
+        inputBackward.style.border = "inset";
+        httpRequest(theURL, "backwardL?speed=255");
+        httpRequest(theURL, "backwardR?speed=255");
+
+        backwardKeyHeld = true;
+    }
+});
+
+document.body.addEventListener("keyup", function(event) {
+
+    if (event.key.toLowerCase() == 's'){
+        inputBackward.style.backgroundColor = "#a3d5dc";
+        inputBackward.style.border = "outset";
+        httpRequest(theURL, "stopR");
+        httpRequest(theURL, "stopL");
+
+        backwardKeyHeld = false;
+    }
+});
+
+//LEFT TURN INPUT
+var inputLeft = document.getElementById("inputLeft");
+document.body.addEventListener("keydown", function(event) {
+    if (event.key.toLowerCase() == 'a' && leftKeyHeld == false) {
+        inputLeft.style.backgroundColor = "#93c1c7";
+        inputLeft.style.border = "inset";
+        httpRequest(theURL, "forwardR?speed=255");
+        httpRequest(theURL, "backwardL?speed=255");
+
+        leftKeyHeld = true;
+    }
+});
+
+document.body.addEventListener("keyup", function(event) {
+    if (event.key.toLowerCase() == 'a'){
+        inputLeft.style.backgroundColor = "#a3d5dc";
+        inputLeft.style.border = "outset";
+        httpRequest(theURL, "stopR");
+        httpRequest(theURL, "stopL");
+
+        leftKeyHeld = false;
+    }
+});
+
+//RIGHT TURN INPUT
+var inputRight = document.getElementById("inputRight");
+document.body.addEventListener("keydown", function(event) {
+    if (event.key.toLowerCase() == 'd' && rightKeyHeld == false) {
+        inputRight.style.backgroundColor = "#93c1c7";
+        inputRight.style.border = "inset";
+        httpRequest(theURL, "backwardR?speed=255");
+        httpRequest(theURL, "forwardL?speed=255");
+
+        rightKeyHeld = true;
+    }
+});
+
+document.body.addEventListener("keyup", function(event) {
+    if (event.key.toLowerCase() == 'd'){
+        inputRight.style.backgroundColor = "#a3d5dc";
+        inputRight.style.border = "outset";
+        httpRequest(theURL, "stopR");
+        httpRequest(theURL, "stopL");
+
+        rightKeyHeld = false;
+    }
+});
+
+//CLAW INPUT
+var inputClaw = document.getElementById("inputClaw");
+document.body.addEventListener("keydown", function(event) {
+    if (event.key.toLowerCase() == 'f' && clawKeyHeld == false) {
+        inputClaw.style.backgroundColor = "#93c1c7";
+        inputClaw.style.border = "inset";
+
+        clawKeyHeld = true;
+    }
+});
+
+document.body.addEventListener("keyup", function(event) {
+    if (event.key.toLowerCase() == 'f'){
+        inputClaw.style.backgroundColor = "#a3d5dc";
+        inputClaw.style.border = "outset";
+
+        clawKeyHeld = false;
+    }
+});
+
+//UP INPUT
+var inputUp = document.getElementById("inputUp");
+document.body.addEventListener("keydown", function(event) {
+    if (event.key.toLowerCase() == ' ' && upKeyHeld == false) {
+        inputUp.style.backgroundColor = "#93c1c7";
+        inputUp.style.border = "inset";
+        httpRequest(theURL, "up");   //Add speed and correct arduino IP later
+
+        upKeyHeld = true;
+    }
+});
+
+document.body.addEventListener("keyup", function(event) {
+    if (event.key.toLowerCase() == ' '){
+        inputUp.style.backgroundColor = "#a3d5dc";
+        inputUp.style.border = "outset";
+        httpRequest(theURL, "stopV");   //Add speed and correct arduino IP later
+
+        upKeyHeld = false;
+    }
+});
+
+//DOWN INPUT
+var inputDown = document.getElementById("inputDown");
+document.body.addEventListener("keydown", function(event) {
+    if (event.keyCode == 16 && downKeyHeld == false) {
+        inputDown.style.backgroundColor = "#93c1c7";
+        inputDown.style.border = "inset";
+        httpRequest(theURL, "down");
+
+        downKeyHeld = true;
+    }
+});
+
+document.body.addEventListener("keyup", function(event) {
+    if (event.keyCode == 16){
+        inputDown.style.backgroundColor = "#a3d5dc";
+        inputDown.style.border = "outset";
+        httpRequest(theURL, "stopV");
+
+        downKeyHeld = false;
+    }
+});
+</script>
+
+<script>
+//HTTP
+var theURL = "http://192.168.1.177/"
+
+function httpRequest(theURL, command) {
+var xhr = new XMLHttpRequest();
+
+xhr.open('get', (theURL + command), true);
+xhr.send();
+}
+</script>
+</body>
+</html>
+
+

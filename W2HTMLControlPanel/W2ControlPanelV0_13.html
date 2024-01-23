@@ -1,0 +1,181 @@
+<!--W2 Master Control Panel V0.13-->
+<!--Handles single motor forward and backward control-->
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>W2 Master Control Panel</title>
+<style>
+.Classborder {
+background-color:#a3d5dc;
+color: black;
+padding: 10px;
+margin: 20px;
+border: 1px solid black;
+}
+.Tahomafont {
+font-family:tahoma;
+}
+#container {
+position:relative;
+width:640px;
+height:480;
+border:10px #a3d5dc inset;
+left:615px;
+top:-300px;
+}
+#videoElement {
+width:640px;
+height:480px;
+background-color:#111;
+}
+
+#body {
+height:1px;
+}
+
+</style>
+</head>
+<body id="body" style="background-color:#c8e1e4;">
+
+<div class="Tahomafont" style="font-size:200%;background-color:#a3d5dc;width:500px;text-align:center;border:3px inset;">
+<span><b>W2 Master Control Panel</b><br><i style="font-size:30%;">v0.13</i></br><span>
+</div>
+
+<div class="Tahomafont" style="position:relative;top:175px;right:490px;"> <!--do not try to make a class for the styles (it breaks everything)-->
+<!--ForwardVis-->
+<p style="font-size:150%;text-align:center;left:722px;position:relative;background-color:#a3d5dc;width:32.5px;height:32.5px;border-style:outset;" id="inputForward">↑</p>
+<!--BackVis-->
+<p style="font-size:150%;text-align:center;left:722px;top:35px;position:relative;background-color:#a3d5dc;width:32.5px;height:32.5px;border-style:outset;" id="inputBackward">↓</p>
+<!--RightVis-->
+<p style="font-size:150%;position:relative;text-align:center;left:780px;top:-74px;background-color:#a3d5dc;width:32.5px;height:32.5px;border-style:outset;" id="inputRight">→</p>
+<!--LeftVis-->
+<p style="font-size:150%;position:relative;left:664px;text-align:center;top:-135px;background-color:#a3d5dc;width:32.5px;height:32.5px;border-style:outset;"id="inputLeft">←</p>
+<!--Claw Control-->
+<p id="inputClaw" style="background-color:#a3d5dc;text-align:center;width:30px;height:100%px;border-style:outset;position:relative;left:724px;text-align:center;top:-188px;">¤</p>
+</div>
+
+<!--Display-->
+<div id="container">
+<!--
+<iframe id="videoElement" src="http://192.168.1.112/videostream.cgi?user=admin&pwn=">
+
+</iframe>
+-->
+</div>
+
+<!--ForwardInputMaster-->
+<script>
+var f = document.getElementById("inputForward");
+document.body.addEventListener("keydown", function(event) {
+if (event.key == 'w' || event.key == 'W') {
+inputForward.style.backgroundColor = "#93c1c7";
+inputForward.style.border = "inset";
+forward();
+}
+});
+document.body.addEventListener("keyup", function(event) {
+if (event.key == 'w' || event.key == 'W'){
+inputForward.style.backgroundColor = "#a3d5dc";
+inputForward.style.border = "outset";
+stop();
+}
+});
+</script>
+
+<!--BackwardInputMaster-->
+<script>
+var b = document.getElementById("inputBackward");
+document.body.addEventListener("keydown", function(event) {
+if (event.key == 's' || event.key == 'S') {
+inputBackward.style.backgroundColor = "#93c1c7";
+inputBackward.style.border = "inset";
+backward();
+}
+});
+document.body.addEventListener("keyup", function(event) {
+if (event.key == 's' || event.key == 'S'){
+inputBackward.style.backgroundColor = "#a3d5dc";
+inputBackward.style.border = "outset";
+stop();
+}
+});
+</script>
+
+<!--LeftInputMaster-->
+<script>
+var l = document.getElementById("inputLeft");
+document.body.addEventListener("keydown", function(event) {
+if (event.key == 'a' || event.key == 'A') {
+inputLeft.style.backgroundColor = "#93c1c7";
+inputLeft.style.border = "inset";
+}
+});
+
+document.body.addEventListener("keyup", function(event) {
+    if (event.key == 'a' || event.key == 'A'){
+        inputLeft.style.backgroundColor = "#a3d5dc";
+        inputLeft.style.border = "outset";
+    }
+});
+</script>
+
+<!--RightInputMaster-->
+<script>
+var r = document.getElementById("inputRight");
+document.body.addEventListener("keydown", function(event) {
+if (event.key == 'd' || event.key == 'D') {
+inputRight.style.backgroundColor = "#93c1c7";
+inputRight.style.border = "inset";
+}
+});
+document.body.addEventListener("keyup", function(event) {
+if (event.key == 'd' || event.key == 'D'){
+inputRight.style.backgroundColor = "#a3d5dc";
+inputRight.style.border = "outset";
+}
+});
+</script>
+
+<!--ClawInputMaster-->
+<script>
+var c = document.getElementById("inputClaw");
+document.body.addEventListener("keydown", function(event) {
+if (event.key == 'f' || event.key == 'F' || event.key == ' ') {
+inputClaw.style.backgroundColor = "#93c1c7";
+inputClaw.style.border = "inset";
+}
+});
+document.body.addEventListener("keyup", function(event) {
+if (event.key == 'f' || event.key == 'F' || event.key == ' '){
+inputClaw.style.backgroundColor = "#a3d5dc";
+inputClaw.style.border = "outset";
+}
+});
+</script>
+
+<script type="text/javascript">
+function httpRequest(theURL) {
+var xhr = new XMLHttpRequest();
+
+xhr.open('get', theURL, true);
+xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+xhr.send();
+}
+
+function forward(){
+httpRequest('http://192.168.1.177/forward');
+}
+
+function backward(){
+httpRequest('http://192.168.1.177/backward');
+}
+
+function stop(){
+httpRequest('http://192.168.1.177/stop');
+}
+</script>
+</body>
+</html>
+
+

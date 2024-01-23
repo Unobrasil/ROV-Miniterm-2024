@@ -1,0 +1,309 @@
+<!--W2 Master Control Panel V0.17-->
+<!--
+	TO-DO (NOT FINISHED): 
+	- add CSS class for buttons
+	- forward and backward keys can be used in combination with turning keys to turn while moving
+	
+	CHANGELOG:
+	- comments added
+	- removed theURL variable > replaced with arduino1, arduino2, and arduino3 variables
+	- condensed the input reading logic into one keyup event listener and one keydown event listener.
+	- made HTTP requests that use forwardBoth, BackwardBoth, and stopBoth commands to turn off both motors at once.
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>W2 Master Control Panel</title>
+<style>
+
+/* use to set font in div */
+.Tahomafont {
+    font-family:tahoma;
+}
+/* div container for video feed */
+#container {
+    position:relative;
+    width:640px;
+    height:480px;
+    border:10px #a3d5dc inset;
+    left:600px;
+    top:-500px;
+}
+
+/* camera feed dimensions are 640*480 at max resolution (sorry thats all the pixels you're gonna get) */
+#videoElement {
+    width:640px;
+    height:480px;
+    background-color:#111;
+}
+
+/* having no page height prevents scrolling down the page when spacebar is pressed */
+
+</style>
+</head>
+<body id="body" style="background-color:#c8e1e4;">
+
+<div class="Tahomafont" style="font-size:200%;background-color:#a3d5dc;width:500px;text-align:center;border:3px inset;">
+<span><b>W2 Master Control Panel</b><br><i style="font-size:30%;">v0.17</i></br><span>
+</div>
+
+<div class="Tahomafont" style="position:relative;top:175px;right:490px;"> <!--do not try to make a class for the styles (it breaks everything)-->
+
+<!--Forward Button-->
+<p style="font-size:150%;text-align:center;left:722px;position:relative;background-color:#a3d5dc;width:32.5px;height:32.5px;border-style:outset;" id="inputForward">↑</p>
+
+<!--Backward Button-->
+<p style="font-size:150%;text-align:center;left:722px;top:35px;position:relative;background-color:#a3d5dc;width:32.5px;height:32.5px;border-style:outset;" id="inputBackward">↓</p>
+
+<!--Right Button-->
+<p style="font-size:150%;position:relative;text-align:center;left:780px;top:-74px;background-color:#a3d5dc;width:32.5px;height:32.5px;border-style:outset;" id="inputRight">→</p>
+
+<!--Left Button-->
+<p style="font-size:150%;position:relative;left:664px;text-align:center;top:-135px;background-color:#a3d5dc;width:32.5px;height:32.5px;border-style:outset; "id="inputLeft">←</p>
+
+<!--Claw Button-->
+<p id="inputClaw" style="background-color:#a3d5dc;text-align:center;width:30px;height:100%px;border-style:outset;position:relative;left:724px;text-align:center;top:-188px;">¤</p>
+
+<!--Up Button-->
+<p style="font-size:150%;position:relative;left:864px;text-align:center;top:-270px;background-color:#a3d5dc;width:32.5px;height:32.5px;border-style:outset;"id="inputUp">↑</p>
+
+<!--Down Button-->
+<p style="font-size:150%;position:relative;left:864px;text-align:center;top:-275px;background-color:#a3d5dc;width:32.5px;height:32.5px;border-style:outset;"id="inputDown">↓</p>
+
+</div>
+
+<!--Display-->
+<div id="container">
+
+<!-- iFrame element connected to Foscam camera's static IP (assigned by router)-->
+<iframe id="videoElement" src="http://192.168.1.125/videostream.cgi?user=admin&pwn=">
+
+</iframe>
+
+</div>
+
+<!--INPUTS READING JS-->
+<script type="text/javascript">
+
+//keyHeld variables prevent HTTP request from spamming while the key is held
+var forwardKeyHeld = false;
+var backwardKeyHeld = false;
+var leftKeyHeld = false;
+var rightKeyHeld = false;
+var clawKeyHeld = false;
+var upKeyHeld = false;
+var downKeyHeld = false;
+
+//arduino IP addresses 
+//(they are static be default and can be changed in the arduino code)
+var arduino1 = "http://192.168.1.177/" //side thruster controller
+var arduino2 = "http://192.168.1.178/" //vertical thruster controller
+var arduino3 = "http://192.168.1.179/" //claw controller 
+
+//variables connected to the button elements in the HTML
+var inputUp = document.getElementById("inputUp");
+var inputDown = document.getElementById("inputDown");
+var inputLeft = document.getElementById("inputLeft");
+var inputRight = document.getElementById("inputRight");
+var inputForward = document.getElementById("inputForward");
+var inputBackward = document.getElementById("inputBackward");
+
+//FORWARD INPUT
+document.body.addEventListener("keydown", function(event) {
+	console.log(event.key);
+
+
+	if (event.key.toLowerCase() == ' ' && upKeyHeld == false) {
+        
+		//change button appearance to be pressed down
+		inputUp.style.backgroundColor = "#93c1c7";
+        inputUp.style.border = "inset";
+		
+		//fire the vertical thruster up
+        httpRequest(arduino2, "up?speed=255");  
+		
+		//set this to true so we dont send multiple HTTP requests
+        upKeyHeld = true;
+    }else if (event.keyCode == 16 && downKeyHeld == false) { //(event.keyCode == 16) is true when you press the shift key
+        
+		//change the botton appearance to be pressed down
+		inputDown.style.backgroundColor = "#93c1c7";
+		
+		//fire the vertical thruster down
+        inputDown.style.border = "inset";
+        httpRequest(arduino2, "down?speed=255");
+		
+		//set this to true so we dont send multiple HTTP requests on one keypress
+        downKeyHeld = true;
+    }
+
+
+    if (event.key.toLowerCase() == 'a' && leftKeyHeld == false) {
+
+		//change button appearance to be pressed down
+		inputLeft.style.backgroundColor = "#93c1c7";
+        inputLeft.style.border = "inset";
+
+		//fire the right thruster forward and the left thruster backward to turn in place
+        httpRequest(arduino1, "forwardR?speed=255");
+        httpRequest(arduino1, "backwardL?speed=255");
+    	
+
+		//set this to true so we dont send multiple HTTP requests on one keypress
+        leftKeyHeld = true;
+    }else if (event.key.toLowerCase() == 'd' && rightKeyHeld == false) {
+        
+		//change button appearance to be pressed down
+		inputRight.style.backgroundColor = "#93c1c7";
+        inputRight.style.border = "inset";
+		
+		//fire the left thruster forward and the right thruster backward to turn
+        httpRequest(arduino1, "forwardL?speed=255");
+        httpRequest(arduino1, "backwardR?speed=255");
+    	
+
+		//set this to true so we dont send multiple http requests on one keypress
+        rightKeyHeld = true;
+    }else if (event.key.toLowerCase() == 'w' && forwardKeyHeld == false) {
+        
+		//change button appearance to be pressed down
+		inputForward.style.backgroundColor = "#93c1c7";
+        inputForward.style.border = "inset";
+		
+		//fire left and right thrusters until key is released
+        httpRequest(arduino1, "forwardBoth?speed=255");
+
+		//set this to true so we don't send multiple HTTP requests on one keypress
+        forwardKeyHeld = true;
+    }else if (event.key.toLowerCase() == 's' && backwardKeyHeld == false) {
+        
+		//change button appearance to be pressed down
+		inputBackward.style.backgroundColor = "#93c1c7";
+        inputBackward.style.border = "inset";
+		
+		//fire the left and right thrusters backward until key is released
+        httpRequest(arduino1, "backwardBoth?speed=255");
+
+		//set this to true so we don't send multiple HTTP requests on one keypress
+        backwardKeyHeld = true;
+    }
+});
+
+document.body.addEventListener("keyup", function(event) {
+    if (event.key.toLowerCase() == ' '){ //UP KEY
+        
+		//change the button appearance to be not pressed down
+		inputUp.style.backgroundColor = "#a3d5dc";
+        inputUp.style.border = "outset";
+		
+		//stop the vertical motor
+        httpRequest(arduino2, "stopV");   
+
+        upKeyHeld = false;
+    }else if (event.keyCode == 16){  //(event.keyCode == 16) is true when you press the shift key
+	
+		//change the button appearance to not be pressed down
+        inputDown.style.backgroundColor = "#a3d5dc";
+        inputDown.style.border = "outset";
+		
+		//stop the vertical motor
+        httpRequest(arduino2, "stopV");
+
+		//set this to false so the keydown code can go again
+        downKeyHeld = false;
+    }else if (event.key.toLowerCase() == 'a'){ 
+       
+		//change button appearance to be not pressed down
+		inputLeft.style.backgroundColor = "#a3d5dc";
+        inputLeft.style.border = "outset";
+        
+		//stop left and right thrusters
+		httpRequest(arduino1, "stopBoth");
+		
+		//set this to false so the keydown listener can go again
+        leftKeyHeld = false;
+    }else if (event.key.toLowerCase() == 'd'){
+	
+		//change button appearance to be not pressed down
+        inputRight.style.backgroundColor = "#a3d5dc";
+        inputRight.style.border = "outset";
+		
+		//stop left and right thrusters
+        httpRequest(arduino1, "stopBoth");
+
+		//set this to false so the keydown can go again
+        rightKeyHeld = false;
+    }else if (event.key.toLowerCase() == 'w'){
+        
+		//change button appearance to not be pressed down
+		inputForward.style.backgroundColor = "#a3d5dc";
+        inputForward.style.border = "outset";
+        
+		//stop left and right thrusters
+		httpRequest(arduino1, "stopBoth");
+
+		//set this to false to the keydown listener can go again
+        forwardKeyHeld = false;
+    }else if (event.key.toLowerCase() == 's'){
+        
+		//change button appearance to be not pressed down
+		inputBackward.style.backgroundColor = "#a3d5dc";
+        inputBackward.style.border = "outset";
+        
+		//stop the left and right thrusters
+		httpRequest(arduino1, "stopBoth");
+
+		//set this to false so the keydown listener can go again
+        backwardKeyHeld = false;
+    }
+});
+
+//CLAW INPUT 
+//(does not send http request yet)
+var inputClaw = document.getElementById("inputClaw");
+document.body.addEventListener("keydown", function(event) {
+    if (event.key.toLowerCase() == 'f' && clawKeyHeld == false) {
+        
+		//change button appearance to be pressed down
+		inputClaw.style.backgroundColor = "#93c1c7";
+        inputClaw.style.border = "inset";
+
+		//set this to true so we don't send multiple HTTP requests
+        clawKeyHeld = true;
+    }
+});
+
+document.body.addEventListener("keyup", function(event) {
+    if (event.key.toLowerCase() == 'f'){
+        
+		//change button appearance to not be pressed down
+		inputClaw.style.backgroundColor = "#a3d5dc";
+        inputClaw.style.border = "outset";
+
+		//set this to false so the keydown listener can go again
+        clawKeyHeld = false;
+    }
+});
+
+</script>
+
+<!--HTTP REQUESTS-->
+<script>
+function httpRequest(theURL, command/* command gets added on to the end of the URL */) {
+
+//make new XMLHttpRequest object "xhr"
+var xhr = new XMLHttpRequest();
+
+//determines type of request and the URL we are sending to
+xhr.open('get', (theURL + command), true);
+
+//send request to given address
+xhr.send();
+}
+</script>
+</body>
+</html>
+
+
