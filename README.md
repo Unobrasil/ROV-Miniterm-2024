@@ -22,6 +22,9 @@ This repository contains the code and instructions for creating a system to cont
   - `/forwardR?speed=x` - Move the right motor forward at speed `x`.
   - `/backwardR?speed=x` - Move the right motor backward at speed `x`.
   - `/stopR` - Stop the right motor.
+  - `/forwardBoth?speed=x` - Moves both motors forward at speed `x`.
+  - `/backwardBoth?speed=x` - Moves both motors backward at speed `x`.
+  - `/stopBoth` - Stops both motors with 1 HTTP request
 - You can add more requests by changing adding/removing items from the `commands[]` array
   - each item has 2 items
   - A string item which will contain the text the `executeMotorCommand()` function with search for in the GET request
@@ -46,7 +49,7 @@ This repository contains the code and instructions for creating a system to cont
 
 
 ## HTML Control Panel
-- The HTML control panel (W2ControlPanelV0_18.html) allows users to send HTTP requests to the Arduino board to control the motors.
+- The HTML control panel (W2ControlPanelV0_17.html) allows users to send HTTP requests to the Arduino board to control the motors.
 - To use the control panel, open the HTML file in a web browser and interact with the provided controls to send HTTP requests to the Arduino board.
 
 ## Getting Started
