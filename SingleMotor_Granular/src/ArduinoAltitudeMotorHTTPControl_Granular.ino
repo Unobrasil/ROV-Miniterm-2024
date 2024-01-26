@@ -1,4 +1,4 @@
-#include <Arduino.h>
+#include <Arduino.h> //You dont need this if you are working in the arduino IDE
 #include <SPI.h>
 #include <Ethernet.h>
 
@@ -23,8 +23,8 @@ Command commands[] = {
   { "stopV", stopMotor }
 };
 
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEF }; // Placeholder MAC Address
-IPAddress ip(192, 168, 1, 178); // Placeholder IP Address, should be unique in your network
+byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEF };
+IPAddress ip(192, 168, 1, 178); 
 
 EthernetServer server(80); // Server will run on port 80
 
@@ -35,6 +35,7 @@ void setup() {
 
   Ethernet.begin(mac, ip);
   server.begin();
+  Serial.begin(9600);
 }
 
 void loop() {

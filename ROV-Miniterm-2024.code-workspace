@@ -8,6 +8,10 @@
 		},
 		{
 			"path": "DualMotor_Granular"
+		},
+		{
+			"name": "Claw",
+			"path": "Claw"
 		}
 	],
 	"settings": {}
