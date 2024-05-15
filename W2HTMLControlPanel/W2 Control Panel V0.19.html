@@ -1,0 +1,252 @@
+<!--W2 Master Control Panel V0.18-->
+<!--
+	TO-DO:
+	- prevent vectors from exceeding 255 or dropping below -255
+	- streamline HTML/CSS code
+
+	CHANGELOG:
+	- made body position fixed: page will no longer scroll for any reason
+	- un-spaghettied the code
+		- added changeUI function
+		- added getKeyData function
+		- added updateRequests function
+		- instead of depending on one big chunk of if/else in the main js code, 
+		  everything has been divided into more managable, scalable functions
+	
+	- added vector-based ROV movement
+		- you can now press multiple keys at a time and it will average the inputs. for example:
+			- forward + backward = nothing 
+			- foward + left = only firing the right motor
+	- made key matching a switch case :3 (Change done by daniel)
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>W2 Master Control Panel</title>
+<style>
+
+/* use to set font in div */
+.Tahomafont {
+    font-family:tahoma;
+}
+/* div container for video feed */
+#container {
+    position:relative;
+    width:640px;
+    height:480px;
+    border:10px #a3d5dc inset;
+    left:600px;
+    top:-500px;
+}
+
+/* camera feed dimensions are 640*480 at max resolution (sorry thats all the pixels you're gonna get) */
+#videoElement {
+    width:640px;
+    height:480px;
+    background-color:#111;
+}
+
+body {
+	position: fixed; /* prevents the page from scrolling */
+}
+
+</style>
+</head>
+<body id="body" style="background-color:#c8e1e4;">
+
+<div class="Tahomafont" style="font-size:200%;background-color:#a3d5dc;width:500px;text-align:center;border:3px inset;">
+<span><b>W2 Master Control Panel</b><br><i style="font-size:30%;">v0.18</i></br><span>
+</div>
+
+<div class="Tahomafont" style="position:relative;top:175px;right:490px;"> <!--do not try to make a class for the styles (it breaks everything)-->
+
+<!--Forward Button-->
+<p style="font-size:150%;text-align:center;left:722px;position:relative;background-color:#a3d5dc;width:32.5px;height:32.5px;border-style:outset;" id="inputForward">↑</p>
+
+<!--Backward Button-->
+<p style="font-size:150%;text-align:center;left:722px;top:35px;position:relative;background-color:#a3d5dc;width:32.5px;height:32.5px;border-style:outset;" id="inputBackward">↓</p>
+
+<!--Right Button-->
+<p style="font-size:150%;position:relative;text-align:center;left:780px;top:-74px;background-color:#a3d5dc;width:32.5px;height:32.5px;border-style:outset;" id="inputRight">→</p>
+
+<!--Left Button-->
+<p style="font-size:150%;position:relative;left:664px;text-align:center;top:-135px;background-color:#a3d5dc;width:32.5px;height:32.5px;border-style:outset; "id="inputLeft">←</p>
+
+<!--Claw Button-->
+<p id="inputClaw" style="background-color:#a3d5dc;text-align:center;width:30px;height:100%px;border-style:outset;position:relative;left:724px;text-align:center;top:-188px;">¤</p>
+
+<!--Up Button-->
+<p style="font-size:150%;position:relative;left:864px;text-align:center;top:-270px;background-color:#a3d5dc;width:32.5px;height:32.5px;border-style:outset;"id="inputUp">↑</p>
+
+<!--Down Button-->
+<p style="font-size:150%;position:relative;left:864px;text-align:center;top:-275px;background-color:#a3d5dc;width:32.5px;height:32.5px;border-style:outset;"id="inputDown">↓</p>
+
+</div>
+
+<!--Display-->
+<div id="container">
+
+<!-- iFrame element connected to Foscam camera's static IP (assigned by router)-->
+<iframe id="videoElement" src="http://192.168.1.125/videostream.cgi?user=admin&pwn=">
+
+</iframe>
+
+</div>
+
+<!--INPUTS READING JS-->
+<script type="text/javascript">
+
+pressedKeys = [];
+
+//arduino IP addresses 
+//In the Arduino code, they are static be default and can be changed 
+const arduino1 = "http://192.168.1.177/" //side thruster controller
+const arduino2 = "http://192.168.1.178/" //vertical thruster controller
+
+//read key inputs
+document.body.addEventListener("keydown", function(event) {
+
+	//console.log(getKeyData(event.key) != false);
+
+	if((!pressedKeys.includes(event.key)) && getKeyData(event.key) != false){ 
+		pressedKeys.push(event.key);
+	
+	console.log(pressedKeys);
+
+	changeUI(getKeyData(event.key).button, true);
+
+	updateRequests(pressedKeys);
+
+	}
+
+});
+
+//read when keys are released
+document.body.addEventListener("keyup", function(event) {
+    
+    //remove the key from the list of pressed keys
+	if(pressedKeys.includes(event.key)){
+    	pressedKeys.splice(pressedKeys.indexOf(event.key), 1);
+
+    	console.log(pressedKeys);
+
+		changeUI(getKeyData(event.key).button, false);
+
+		updateRequests(pressedKeys);
+	}
+
+});
+
+//FUNCTIONS
+
+function httpRequest(theURL, command/* command gets added on to the end of the URL */) {
+
+	//make new XMLHttpRequest object "xhr"
+	var xhr = new XMLHttpRequest();
+
+	//determines type of request and the URL we are sending to
+	xhr.open('get', (theURL + command), true);
+
+	//send request to given address
+	xhr.send();
+}
+
+function changeUI(button, keyIsPressed){
+	if(keyIsPressed){
+		//change button appearance to be pressed down
+		button.style.backgroundColor = "#93c1c7";
+    	button.style.border = "inset";
+	}else{
+		//change button appearance to be released
+    	button.style.backgroundColor = "#a3d5dc";
+    	button.style.border = "outset";
+	}
+}
+
+function getKeyData(key){
+
+	//button elements in the HTML
+	var inputUp = document.getElementById("inputUp"); 
+	var inputDown = document.getElementById("inputDown"); 
+	var inputLeft = document.getElementById("inputLeft");
+	var inputRight = document.getElementById("inputRight");
+	var inputForward = document.getElementById("inputForward");
+	var inputBackward = document.getElementById("inputBackward");
+	var inputClaw = document.getElementById("inputClaw");
+
+	var keyMappings = [
+    	{arduino:arduino1, button:inputForward, leftMotor:255, rightMotor:255, vertMotor:0}, //w key
+    	{arduino:arduino1, button:inputLeft, leftMotor:-255, rightMotor:255, vertMotor:0}, //a key
+    	{arduino:arduino1, button:inputBackward, leftMotor:-255, rightMotor:-255, vertMotor:0}, //s key
+    	{arduino:arduino1, button:inputRight, leftMotor:255, rightMotor:-255, vertMotor:0}, //d key
+   		{arduino:arduino2, button:inputUp, leftMotor:0, rightMotor:0, vertMotor:255}, //spacebar
+    	{arduino:arduino2, button:inputDown, leftMotor:0, rightMotor:0, vertMotor:-255}, //shift key
+    	{arduino:"", request:"", button:inputClaw, leftMotor:0, rightMotor:0, vertMotor:0} //f key (deprecated: claw does not use digital controls at the moment)
+	];
+
+
+	switch (key.toLowerCase()) {
+		case 'w':
+			return keyMappings[0];
+		case 'a':
+			return keyMappings[1];
+		case 's':
+			return keyMappings[2];
+		case 'd':
+			return keyMappings[3];
+		case ' ':
+			return keyMappings[4];
+		case 'f':
+			return keyMappings[6];
+		default:
+			if (key === 'Shift') {
+			return keyMappings[5];
+			} else {
+			return false;
+			}
+	}
+}
+function updateRequests(pressedKeys){
+
+	leftSpeed = 0;
+	rightSpeed = 0;
+	vertSpeed = 0;
+
+	if(pressedKeys.length != 0){
+		for(let i in pressedKeys){
+			keyData = getKeyData(pressedKeys[i]);
+
+			leftSpeed += keyData.leftMotor;
+			rightSpeed += keyData.rightMotor;
+			vertSpeed += keyData.vertMotor;
+			console.log(keyData);
+		}
+	}
+
+	if(leftSpeed >= 0){
+		httpRequest(arduino1, "forwardL?speed=" + leftSpeed);
+	}else{ //else if negative
+		httpRequest(arduino1, "backwardL?speed=" + Math.abs(leftSpeed));
+	}
+
+	if(rightSpeed >= 0){
+		httpRequest(arduino1, "forwardR?speed=" + rightSpeed);
+	}else{//else if negative
+		httpRequest(arduino1, "backwardR?speed=" + Math.abs(rightSpeed));
+	}
+
+	if(vertSpeed >= 0){
+		httpRequest(arduino2, "up?speed=" + vertSpeed);
+	}else{
+		httpRequest(arduino2, "down?speed=" + Math.abs(vertSpeed));
+	}
+
+	console.log({left:leftSpeed, right:rightSpeed, vert:vertSpeed});
+
+}
+
+</script>
+</body>
+</html>

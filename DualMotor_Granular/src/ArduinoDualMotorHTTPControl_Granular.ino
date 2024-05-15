@@ -10,7 +10,7 @@ int motor2pin1 = 4;
 int motor2pin2 = 5;
 int motor2ENA = 6;
 
-void forwardL(int);
+/*void forwardL(int);
 void backwardL(int);
 void stopL();
 void forwardR(int);
@@ -19,12 +19,17 @@ void stopR();
 void forwardAll(int);
 void backwardAll(int);
 void stopAll();
+*/
+void driveL(int);
+void driveR(int);
+void driveB(int);
 
 struct Command {
   const char* str;
   void (*func)(int);
 };
 
+/* Old coamands Array
 Command commands[] = {
   { "forwardL", forwardL },
   { "backwardL", backwardL },
@@ -35,6 +40,11 @@ Command commands[] = {
   { "forwardBoth", forwardAll },
   { "backwardBoth", backwardAll },
   { "stopBoth", stopAll }
+};*/
+Command commands[] = {
+  { "driveL" , driveL },
+  { "driveR" , driveR },
+  { "driveB" , driveB }
 };
 
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED }; // Placeholder MAC Address
@@ -119,6 +129,55 @@ void executeMotorCommand(const char* command) {
   }
 }
 
+void driveL(int speed){
+  if(speed == 0){
+    analogWrite(motor1ENA, 0);
+  } else if(speed < 0){
+    digitalWrite(motor1pin1, LOW);
+    digitalWrite(motor1pin2, HIGH);
+    analogWrite(motor1ENA, abs(speed));
+  } else{
+      digitalWrite(motor1pin1, HIGH);
+      digitalWrite(motor1pin2, LOW);
+      analogWrite(motor1ENA, speed);
+  }
+}
+
+void driveR(int speed){
+  if(speed == 0){
+    analogWrite(motor1ENA, 0);
+  } else if(speed < 0){
+    digitalWrite(motor2pin1, LOW);
+    digitalWrite(motor2pin2, HIGH);
+    analogWrite(motor2ENA, abs(speed));
+  } else{
+      digitalWrite(motor2pin1, HIGH);
+      digitalWrite(motor2pin2, LOW);
+      analogWrite(motor2ENA, speed);
+  }  
+}
+
+void driveB(int speed){
+  if(speed == 0){
+    analogWrite(motor1ENA, 0);
+    analogWrite(motor2ENA, 0);
+  } else if(speed < 0){
+    digitalWrite(motor1pin1, LOW);
+    digitalWrite(motor1pin2, HIGH);
+    analogWrite(motor1ENA, abs(speed));
+    digitalWrite(motor2pin1, LOW);
+    digitalWrite(motor2pin2, HIGH);
+    analogWrite(motor2ENA, abs(speed));
+  } else{
+      digitalWrite(motor1pin1, HIGH);
+      digitalWrite(motor1pin2, LOW);
+      analogWrite(motor1ENA, abs(speed));
+      digitalWrite(motor2pin1, HIGH);
+      digitalWrite(motor2pin2, LOW);
+      analogWrite(motor2ENA, abs(speed));
+  }
+}
+/* Unused functions from a previous version
 void forwardL(int speed) {
   digitalWrite(motor1pin1, HIGH);
   digitalWrite(motor1pin2, LOW);
@@ -164,4 +223,4 @@ void backwardAll(int speed){
 void stopAll(){
   stopL();
   stopR();
-}
+}*/

@@ -50,6 +50,7 @@ void loop() {
             break;
           } else {
             //Ignore if it's not a GET request
+            
             if (currentLine.startsWith("GET")) {
               executeMotorCommand(currentLine.c_str());
               client.println("HTTP/1.1 200 OK");
